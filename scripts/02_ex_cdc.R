@@ -16,6 +16,7 @@ cdc$gender <- factor(cdc$gender)
 
 str(cdc)
 
+
 # basic stats ####
 
 tapply(cdc$height, cdc$gender, mean)
@@ -48,3 +49,14 @@ hist(cdc$age, main = "age", xlab = "age")
 # box plot of age of the participants ####
 
 boxplot(cdc$age, xlab = "age")
+
+hist(cdc$weight_kg, , las = 1, main = "Weight of participants (kg)", col = 3, density = 20, xlab = "Bins of weight (kg)")
+
+boxplot(cdc$weight_kg, xlab = "Weight (Kg)")
+
+boxplot(data = cdc, weight_kg ~ genhlth , xlab = "Weight (Kg)", col = 1:5)
+
+head(cdc)
+
+health_mapping <- c("poor" = 1, "fair" = 2, "good" = 3, "very good" = 4, "excellent" = 5)
+cdc$genhlth_num <- health_mapping[cdc$genhlth]

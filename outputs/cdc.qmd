@@ -1,0 +1,25 @@
+---
+title: "cdc"
+author: "ibdj"
+format: docx
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+setwd()
+cdc <- read_csv("data/cdc.csv")
+```
+
+```{r}
+hist(cdc$weight_kg, , las = 1, main = "Weight of participants (kg)", col = 2, density = 15, xlab = "Bins of weight (kg)")
+```
+
+You can add options to executable code like this
