@@ -2,7 +2,7 @@ setwd("C:/ANST/Undervisning/Kurser/phd kursus i basal statistik Jun2024/Regressi
 
 
 # Slide 8:
-crime <- read.delim("us_statewide_crime.txt")
+crime <- read.delim("data/us_statewide_crime.txt")
 
 head(crime)
 
@@ -38,6 +38,8 @@ my.t<-beta/(sqrt(sigma2)/sqrt(sum((x-mean(x))^2)))
 
 #Slide 23:
 
+
+# TO USE FOR REPORT
 confint(reg1)
 #Nice table
 tab <- cbind(coef(summary(reg1))[ , 1:2], "Lower" = confint(reg1)[ , 1],
@@ -47,6 +49,8 @@ tab
 data.frame(round(tab, 2),
            "p-value" = format.pval(coef(summary(reg1))[ , 4], digits = 3, eps = 1e-3))
 
+# slide 27
+# residual plots
 
 #Slide 29:
 
@@ -54,6 +58,7 @@ par(mfrow=c(2,2))
 plot(reg1, which=1:4)
 par(mfrow=c(1,1))
 
+# cooks distance: not good indicator if above 1 
 
 # Slide 31:
 
@@ -69,8 +74,10 @@ par(mfrow=c(1,1))
 
 # Slide 33:
 
+#checking linearity
 plot(residuals(reg2) ~ college, data=crime50)
 abline(h = 0, lty = 2)
+#no structure; that is good
 
 # Slide 35:
 
