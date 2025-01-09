@@ -1,0 +1,5 @@
+Boy	Colour_blind	Count
+1	1	6
+1	0	144
+0	1	1
+0	0	119
