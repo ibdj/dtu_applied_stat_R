@@ -1,0 +1,58 @@
+---
+title: "Report for 02935 Introduction to applied statistics and R for PhD students, Winter 2025"
+author: "Ida Bomholt Dyrholm Jacobsen"
+format: 
+  pdf:
+    geometry: "top=25.4mm, right=25.4mm, bottom=25.4mm, left=25.4mm"
+    documentclass: scrbook
+    #classoption: a4paper
+    papersize: A4
+    titlepage: true
+    titlepage-theme:
+      bg-image: "images/test.png"
+      bg-image-size: "cover"
+    include-in-header: 
+      text: |
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhead[C]{Header text}
+        \fancyfoot[L]{Footer text}
+toc: false
+---
+
+{{< pagebreak >}}
+
+\tableofcontents
+
+{{< pagebreak >}}
+
+# Data description
+
+Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland with in 1 m^2^ plots documenting the vascular plant species abundances and their related abiotic variables, soil moisture and temperature. The vascular plant plant abundance was visually assessed by an expert and recorded on a modified Braun-Blanquet scale. Soil temperature was measured with a generic thermometer. Soil moisture was collected a ThetaProbe.
+
+{{< pagebreak >}}
+
+# Scientific question
+
+-   Does different species of shrub have different preferences for soil moisture and/or temperature?
+
+-   
+
+# Analysis
+
+# Appendix
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

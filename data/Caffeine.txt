@@ -1,0 +1,13 @@
+Marital	Caffeine	Count
+Married	0-0	652
+Married	1-150	1537
+Married	150-300	598
+Married	300+	242
+PrevMar	0-0	36
+PrevMar	1-150	46
+PrevMar	150-300	38
+PrevMar	300+	21
+Single	0-0	218
+Single	1-150	327
+Single	150-300	106
+Single	300+	67
