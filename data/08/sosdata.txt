@@ -1,0 +1,9 @@
+"smoking" "obesity" "snoring" "n.tot" "n.hyp"
+"1" "No" "No" "No" 60 5
+"2" "Yes" "No" "No" 17 2
+"3" "No" "Yes" "No" 8 1
+"4" "Yes" "Yes" "No" 2 0
+"5" "No" "No" "Yes" 187 35
+"6" "Yes" "No" "Yes" 85 13
+"7" "No" "Yes" "Yes" 51 15
+"8" "Yes" "Yes" "Yes" 23 8
