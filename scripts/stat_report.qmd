@@ -65,6 +65,20 @@ cat(column_string)
 
 ```{r}
 
+stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
+
+empnig <- stat_mappingplants[stat_mappingplants$taxon=="Empetrum nigrum",]
 
 
+par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1,1))
+model <- gam(bb_num ~ s(mean_soil_moisture), data = empnig)
+plot(model) 
+par(mfrow = c(1,1))
+
+summary(model)
+
+library(tree)
+model<-tree(bb_num ~ ., data = empnig)
+plot(model)
+text(model)
 ```
