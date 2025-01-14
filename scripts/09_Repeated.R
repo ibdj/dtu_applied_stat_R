@@ -309,6 +309,8 @@ VarCorr(model1)
 #intra class correlation
 0.027478/(0.027478+0.037899)
 
+#0.42; nearly haft of the noise from the results are from the difference between the cages
+
 #Model check
 # We still have assumptions
 
@@ -360,6 +362,7 @@ summary(analysis2)
 
 
 # Slide 72: 
+# histamine in dogs exercise
 
 histamin <- read.table("Data/histamin.txt", header=T, sep=",", dec=".")
 histamin$dog <- factor(histamin$dog)

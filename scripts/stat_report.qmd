@@ -28,7 +28,7 @@ toc: false
 
 # Data description
 
-Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland with in 1 m^2^ plots documenting the vascular plant species abundances and their related abiotic variables, soil moisture and temperature. The vascular plant plant abundance was visually assessed by an expert and recorded on a modified Braun-Blanquet scale. Soil temperature was measured with a generic thermometer. Soil moisture was collected a ThetaProbe.
+Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland with in 1 m^2^ circular plots documenting the vascular plant species abundances and their related abiotic variables, soil moisture and temperature. The abundance of each species of vascular plant was visually assessed by an expert and recorded on a modified Braun-Blanquet scale. Soil temperature was measured with a generic thermometer. Soil moisture was collected a ThetaProbe.
 
 {{< pagebreak >}}
 
@@ -45,14 +45,26 @@ Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenlan
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
-1 + 1
+library(googlesheets4)
+library(janitor)
+library(tidyverse)
 ```
 
 You can add options to executable code like this
 
 ```{r}
 #| echo: false
-2 * 2
+mappingplants <- read_sheet("https://docs.google.com/spreadsheets/d/1gAAk09YgYKcUidop3xwplKaXW3rQoOgUoF4EtZganAA/edit?gid=407247046#gid=407247046", sheet = 'survey_0', skip = 0) |> 
+  clean_names()
+
+column_list <- colnames(mappingplants)
+
+column_string <- paste(column_list, collapse = ",\n")
+cat(column_string)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+
+
+
+```

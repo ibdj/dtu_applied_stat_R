@@ -2,12 +2,12 @@
 
 # Slide 6:
 # reading in data:
-load("Data/Winedata.Rdata")
+load("data/Winedata.Rdata")
 
 # two objects: wines, with characteristics, and vintages the wine type.
-ls()
+ls(wines)
 
-#Slide 7:
+#Slwines#Slide 7:
 par(mfrow = c(4,4))
 for (i in 1:13) boxplot(wines[,i] ~ vintages, col = 2:4, 
                         main=paste(names(wines)[i]))
@@ -16,17 +16,18 @@ par(mfrow = c(1,1))
 # Slide 8:
 
 library(car)
-scatterplotMatrix(wines)
-
+rownames(iris) = iris$Species
 
 #slide 10:
 # looking at variation:
-round(var(wines),digits=2)
+round(var(iris),digits=2)
 
 # Slide 11:
 round(var(scale(wines)),digits=2)
 
 # Slide 12:
+
+# similar scale for all observatiosen
 X<-var(scale(wines))
 
 sum(diag(X))
@@ -67,7 +68,6 @@ data.frame("Eigenvectors"=1:13,"Variance Explained"=round(100*(cumsum(diag(Lambd
 install.packages("remotes")
 library(remotes)
 install_github("rwehrens/ChemometricsWithR")
-
 library(ChemometricsWithR)
 wines.PC<- PCA(scale(wines))
 names(wines.PC)
@@ -100,7 +100,6 @@ scoreplot(wines.PC, col = vintages, pch= as.numeric(vintages), lwd=2)
 legend("bottomright",levels(vintages), col=1:3,pch=1:3)
 
 # Slide 29:
-
 loadingplot(wines.PC, show.names= TRUE)
 
 # Slide 30:
@@ -138,7 +137,7 @@ text(res$SDist, res$ODist, labels=as.character(1:178))
 
 # Slide 38:
 
-jam<-read.table("Data/Jam.txt", header=TRUE, quote="\"")
+jam<-read.table("data/jam.txt", header=TRUE, quote="\"")
 
 # first column is names, last column is outcome:
 
@@ -193,7 +192,7 @@ summary(analysis)$coef
 install.packages("jpeg")
 library(jpeg)
 
-horse <- readJPEG("Data/horse.jpg")
+horse <- readJPEG("data/horse.jpg")
 
 ncol(horse)
 ## [1] 480

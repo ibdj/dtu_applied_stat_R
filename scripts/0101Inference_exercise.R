@@ -1,12 +1,24 @@
 
 # EXERCISE 1
 
+#1 Set your working directory to where you keep your data for today.
+#2 Load the cars dataset mtcars.txt.
+#3 Describe the data
+#4 Make plots of the variable miles per gallon, mpg.
+#5 Calculate summary statistics for mpg.
+#6 Where would we expect most of the observations to be found?
+#7 Calculate IQR and 0.025, 0.975 percentiles.
+
+##################################### 1 set wd ###########################################################################################
+
 # SET WORKING DIRECTORY
-setwd("C:/Users/ANST/Undervisning/Kurser/phd kursus i basal statistik Jan25/Inferens og t-tests/Inferens")
+#setwd("C:/Users/ANST/Undervisning/Kurser/phd kursus i basal statistik Jan25/Inferens og t-tests/Inferens")
 
+##################################### 2 load data ########################################################################################
 # READ IN
-Cars <- read.delim("Data/mtcars.txt")
+Cars <- read.delim("data/01/mtcars.txt")
 
+##################################### 3 Describe the data ################################################################################
 #DESCRIBE
 summary(Cars)
 
@@ -16,11 +28,12 @@ str(Cars)
 summary(Cars$mpg)
 sd(Cars$mpg)
 
+##################################### 4 Make plots #######################################################################################
 # PLOTS FOR mpg
 hist(Cars$mpg)
 
-boxplot(Cars$mpg, horizontal = TRUE, xlab="Miles per Gallon", col=5)
-rug(Cars$mpg)
+boxplot(Cars$mpg, horizontal = T, xlab="Miles per Gallon", col=5)
+rug(Cars$mpg) #rug does not work for hirsontal F
 
 # IF WE HAVE NORMAL DATA WE WOULD EXPECT MOST BETWEEN
 
@@ -44,6 +57,7 @@ quantile(Cars$mpg, probs = c(0.025,0.975), type=2)
 ##############################
 # EXERCISE 2
 
+# filtering data1
 Cars_auto <- Cars[Cars$am==0,]
 Cars_manual <- Cars[Cars$am==1,]
 
