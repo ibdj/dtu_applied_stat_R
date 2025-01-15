@@ -36,9 +36,45 @@ Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenlan
 
 -   Does different species of shrub have different preferences for soil moisture and/or temperature?
 
--   
+-   What model can describe the relationship between the abundance of the most common species (\> 10 observations in plots) and soil moisture?
+
+-   Can PCA reveal any kind of structure in the collected data based the abundance of different species?
 
 # Analysis
+
+Assumed model
+
+assumption
+
+evaluation
+
+## PCA
+
+```{r}
+
+library(tidyverse)
+library(janitor)
+
+wide_data <- stat_mappingplants[-c(590, 288), ] |> 
+  filter(rowid < 102) |> 
+  pivot_wider(id_cols = plot_name, names_from = taxon, values_from = bb_num, values_fill = "0") |> 
+  clean_names()
+
+wide_data2 <- wide_data |> 
+  mutate(across(-1, ~ as.numeric(as.character(.)))) |> 
+  mutate(across(-1, ~ replace_na(., 0)))
+
+sum(is.na(wide_data2))
+
+pca_stat <- wide_data2[,-1 ]
+
+wide_data2
+
+select_cols_list(wide_data)
+
+str(wide_data)
+  mutate(across(where(is.list), ~ unlist(.)))
+```
 
 # Appendix
 
@@ -48,6 +84,17 @@ When you click the **Render** button a document will be generated that includes 
 library(googlesheets4)
 library(janitor)
 library(tidyverse)
+```
+
+```{r}
+select_cols_list <- function(df) {
+  column_list <- colnames(df)
+  column_string <- paste(column_list, collapse = ",\n")
+  cat(column_string, "\n")
+  invisible(column_string)
+}
+
+select_cols_list()
 ```
 
 You can add options to executable code like this
@@ -67,11 +114,23 @@ cat(column_string)
 
 stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
 
+taxa <- pivot |> 
+  group_by(taxon) |> 
+  count()
+
+soil_moi <- stat_mappingplants
+
+plot(x = stat_mappingplants$mean_soil_moisture, y = stat_mappingplants$mean_veg_height)
+
+hist(stat_mappingplants$mean_soil_moisture)
+
 empnig <- stat_mappingplants[stat_mappingplants$taxon=="Empetrum nigrum",]
+
+plot(x = empnig$mean_soil_moisture, y = empnig$bb_num)
 
 
 par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1,1))
-model <- gam(bb_num ~ s(mean_soil_moisture), data = empnig)
+model <- gam(bb_num ~ s(mean_soil_moisture), data = stat_mappingplants[stat_mappingplants$taxon == "Salix arctophila", ])
 plot(model) 
 par(mfrow = c(1,1))
 
@@ -81,4 +140,29 @@ library(tree)
 model<-tree(bb_num ~ ., data = empnig)
 plot(model)
 text(model)
+```
+
+```{r}
+taxon_counts <- table(stat_mappingplants$taxon)
+
+# Convert to a data frame for easier manipulation
+taxon_summary <- data.frame(
+  Taxon = names(taxon_counts),
+  Count = as.vector(taxon_counts)
+)
+
+taxon_summary <- taxon_summary[order(-taxon_summary$Count), ]
+
+```
+
+```{r}
+# Count the occurrences of each taxon
+taxon_counts <- table(stat_mappingplants$taxon)
+
+# Get the names of taxons with more than 10 observations
+frequent_taxons <- names(taxon_counts[taxon_counts > 10])
+
+# Filter the dataset
+filtered_df <- stat_mappingplants[stat_mappingplants$taxon %in% frequent_taxons, ]
+
 ```
