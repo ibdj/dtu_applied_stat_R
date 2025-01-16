@@ -4,43 +4,79 @@ author: "Ida Bomholt Dyrholm Jacobsen"
 format: 
   pdf:
     geometry: "top=25.4mm, right=25.4mm, bottom=25.4mm, left=25.4mm"
-    documentclass: scrbook
+    documentclass: report
     #classoption: a4paper
     papersize: A4
     titlepage: true
     titlepage-theme:
       bg-image: "images/test.png"
       bg-image-size: "cover"
-    include-in-header: 
-      text: |
-        \usepackage{fancyhdr}
-        \pagestyle{fancy}
-        \fancyhead[C]{Header text}
-        \fancyfoot[L]{Footer text}
+
 toc: false
 ---
 
-{{< pagebreak >}}
+# Summary
 
 \tableofcontents
 
 {{< pagebreak >}}
 
-# Data description
+# Introduction
 
-Data was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland with in 1 m^2^ circular plots documenting the vascular plant species abundances and their related abiotic variables, soil moisture and temperature. The abundance of each species of vascular plant was visually assessed by an expert and recorded on a modified Braun-Blanquet scale. Soil temperature was measured with a generic thermometer. Soil moisture was collected a ThetaProbe.
+{{< pagebreak >}}
+
+# Description of data
+
+The data process in the following report was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland in 2024. The data was collected in 100 plots placed in an area of interest of aproxemately 12 km^2^ by randomised stratified sampling. Stratification was based on elevation (5 bins) and NDVI (4 bins).
+
+Within each circular plot of 1 m^2^ the abundance and maximum height of all vascular plant species was recorded. Abundance was assessed by means of the well known Braun-Blanquet scale (8 step version).
+
+In all plots soil temperature, soil moisture, and general vegetation height, was measured as well. Soil temperature was measured with a generic thermometer (°C, 4 measurements, mean calculated). Soil moisture was measured with a ThetaProbe (% water content, 4 measurements, mean calculated). General vegetation height was measured with a generic ruler (cm, 4 measurements, mean calculated)
+
+The final processed data contains data from 100 plots and 72 species of vascular plants.
+
+```{r}
+
+stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
+
+stat_mappingplants$taxon <- as.factor(stat_mappingplants$taxon)
+
+str(stat_mappingplants)
+```
 
 {{< pagebreak >}}
 
 # Scientific question
 
--   Does different species of shrub have different preferences for soil moisture and/or temperature?
+-   Does the most common species have different preferences (= abundance) for soil moisture and/or temperature?
+
+    -   
+
+        -   
 
 -   What model can describe the relationship between the abundance of the most common species (\> 10 observations in plots) and soil moisture?
 
 -   Can PCA reveal any kind of structure in the collected data based the abundance of different species?
 
-# Analysis
+    -   If so, what do these structures indicate?
+
+# Statistical analyses
+
+The relationship between soil moisture and abundance of a given species cannot be assumed to be linear. Any given species of plants will have a preference for soil moisture (a wide or narrow interval) where frequency is highest. Abundance of said species will decrease with higher or lower soil moisture than this optimum. Hence, the relation could be considered to have somewhat a bell shape, but uncertain whether this would be symmetrical.
+
+Thus, for the purpose of the analysis a generalised additive model (GAM) have been chosen. Thise choise was made with emphasis on the fact that this model does not make any assumptions about the relationship of the explanatory and response variable.
+
+-   Estimation: Which parameter values t the observations best? How certain are we of our estimates?
+
+-   Model check : Are the assumptions on the underlying model fullled? Logically this should come rst, but for practical reasons it comes after estimation.
+
+-   Simplifying the model (te
+
+Model choise (expexted relation ship, data types)
+
+## results
+
+## discussion
 
 Assumed model
 
@@ -48,16 +84,36 @@ assumption
 
 evaluation
 
+• Statistical analyses
+
+• results
+
+• discussion
+
 ## PCA
 
 ```{r}
+#| label: select_cols_list_function
+
+select_cols_list <- function(df) {
+  column_list <- colnames(df)
+  column_string <- paste(column_list, collapse = ",\n")
+  cat(column_string, "\n")
+  invisible(column_string)
+}
+```
+
+```{r}
+#| label: pca-data-prepping
 
 library(tidyverse)
 library(janitor)
 
+stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
+
 wide_data <- stat_mappingplants[-c(590, 288), ] |> 
   filter(rowid < 102) |> 
-  pivot_wider(id_cols = plot_name, names_from = taxon, values_from = bb_num, values_fill = "0") |> 
+  pivot_wider(id_cols = plot_name, names_from = taxon, values_from = bb_num) |> 
   clean_names()
 
 wide_data2 <- wide_data |> 
@@ -66,80 +122,148 @@ wide_data2 <- wide_data |>
 
 sum(is.na(wide_data2))
 
-pca_stat <- wide_data2[,-1 ]
+#pca_stat <- wide_data2[,-1 ]
+
+pca_stat <- wide_data2[, !(names(wide_data2) %in% c("plot_name", "phleum_commutatum"))]
 
 wide_data2
 
 select_cols_list(wide_data)
 
-str(wide_data)
-  mutate(across(where(is.list), ~ unlist(.)))
+str(wide_data2)
+
+
 ```
+
+```{r}
+#| label: pca-visualisation
+
+library(remotes)
+#install_github("rwehrens/ChemometricsWithR")
+library(ChemometricsWithR)
+mp.PC<- PCA(scale(pca_stat))
+names(mp.PC)
+summary(mp.PC)
+
+head(mp.PC$loadings,n=3)
+
+X<-var(scale(pca_stat))
+T<-eigen(X)$vectors
+sum(is.na(X))
+head(T,n=3)
+Lambda<-t(T)%*%X%*%T
+round(Lambda, digits=3)
+T[,1]
+round(T[,1],digits=2)
+sum(diag(Lambda))
+scoreplot(mp.PC, lwd=2)
+
+```
+
+```{r}
+plot(1:73,mp.PC$var,xlab="PC",ylab="var")
+abline(h = 1, col = "red", lty = 2)
+```
+
+```{r}
+#| label: soil_moisture
+
+plot_moisture <- stat_mappingplants |> 
+  group_by(plot_name) |> 
+  summarize(mean = mean(mean_soil_moisture))
+
+plot(x = plot_moisture$mean, y = plot_moisture$mean)
+hist(plot_moisture$mean)
+
+```
+
+```{r}
+# # Install and load vegan package
+# install.packages("vegan")
+# library(vegan)
+# 
+# # Compute the Bray-Curtis dissimilarity matrix
+# bray_curtis <- vegdist(pca_stat, method = "bray")
+# 
+# # Convert to a matrix (since vegdist returns a dist object)
+# bray_curtis_matrix <- as.matrix(bray_curtis)
+# 
+# # Perform classical MDS (similar to PCA, but using dissimilarity matrix)
+# mds <- cmdscale(bray_curtis_matrix, k = 2)  # k is the number of dimensions you want to keep (e.g., 2)
+# 
+# # Plot the MDS result
+# plot(mds, main = "PCA-like plot using Bray-Curtis Dissimilarity")
+```
+
+```{r}
+
+# #| label: chunk-6
+# # Perform k-means clustering (example: 3 clusters)
+# set.seed(42)
+# kmeans_result <- kmeans(wide_data2[, -1], centers = 32)  # Exclude first column (plot_name)
+# 
+# # Add the cluster labels to the dataset
+# wide_data2$cluster <- as.factor(kmeans_result$cluster)
+# 
+# # Fit the tree model with k-means cluster labels as the response
+# tree_model <- tree(cluster ~ ., data = wide_data2[, -1])  # Exclude non-numeric columns (plot_name, etc.)
+# 
+# plot(tree_model)
+# text(tree_model, pretty = 0) 
+# 
+# # Print the tree model
+# summary(tree_model)
+```
+
+# Conclusion
 
 # Appendix
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
+#| label: loading packages
+#| echo: false
 library(googlesheets4)
 library(janitor)
 library(tidyverse)
 ```
 
-```{r}
-select_cols_list <- function(df) {
-  column_list <- colnames(df)
-  column_string <- paste(column_list, collapse = ",\n")
-  cat(column_string, "\n")
-  invisible(column_string)
-}
-
-select_cols_list()
-```
-
 You can add options to executable code like this
 
 ```{r}
-#| echo: false
-mappingplants <- read_sheet("https://docs.google.com/spreadsheets/d/1gAAk09YgYKcUidop3xwplKaXW3rQoOgUoF4EtZganAA/edit?gid=407247046#gid=407247046", sheet = 'survey_0', skip = 0) |> 
-  clean_names()
-
-column_list <- colnames(mappingplants)
-
-column_string <- paste(column_list, collapse = ",\n")
-cat(column_string)
 ```
 
 ```{r}
 
-stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
-
-taxa <- pivot |> 
-  group_by(taxon) |> 
-  count()
-
-soil_moi <- stat_mappingplants
-
-plot(x = stat_mappingplants$mean_soil_moisture, y = stat_mappingplants$mean_veg_height)
-
-hist(stat_mappingplants$mean_soil_moisture)
-
-empnig <- stat_mappingplants[stat_mappingplants$taxon=="Empetrum nigrum",]
-
-plot(x = empnig$mean_soil_moisture, y = empnig$bb_num)
-
-
-par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1,1))
-model <- gam(bb_num ~ s(mean_soil_moisture), data = stat_mappingplants[stat_mappingplants$taxon == "Salix arctophila", ])
-plot(model) 
-par(mfrow = c(1,1))
-
-summary(model)
-
-library(tree)
-model<-tree(bb_num ~ ., data = empnig)
-plot(model)
-text(model)
+# stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
+# 
+# taxa <- pivot |> 
+#   group_by(taxon) |> 
+#   count()
+# 
+# soil_moi <- stat_mappingplants
+# 
+# plot(x = stat_mappingplants$mean_soil_moisture, y = stat_mappingplants$mean_veg_height)
+# 
+# hist(stat_mappingplants$mean_soil_moisture)
+# 
+# empnig <- stat_mappingplants[stat_mappingplants$taxon=="Empetrum nigrum",]
+# 
+# plot(x = empnig$mean_soil_moisture, y = empnig$bb_num)
+# 
+# 
+# par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1,1))
+# model <- gam(bb_num ~ s(mean_soil_moisture), data = stat_mappingplants[stat_mappingplants$taxon == "Salix arctophila", ])
+# plot(model) 
+# par(mfrow = c(1,1))
+# 
+# summary(model)
+# 
+# library(tree)
+# model<-tree(bb_num ~ ., data = empnig)
+# plot(model)
+# text(model)
 ```
 
 ```{r}
@@ -165,4 +289,15 @@ frequent_taxons <- names(taxon_counts[taxon_counts > 10])
 # Filter the dataset
 filtered_df <- stat_mappingplants[stat_mappingplants$taxon %in% frequent_taxons, ]
 
+```
+
+```{r}
+#| label: taxon-height-vs-plot_height
+
+veg_height <- stat_mappingplants |> 
+  group_by(plot_name) |> 
+  summarize(mean_tax = mean(height),
+            mean_plot = mean(mean_veg_height))
+
+plot(y = veg_height$mean_tax, x = veg_height$mean_plot)
 ```
