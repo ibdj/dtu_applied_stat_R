@@ -136,6 +136,14 @@ str(wide_data2)
 ```
 
 ```{r}
+#| label: pca-skree-plot
+#| echo: false
+plot(1:73,mp.PC$var,xlab="PC",ylab="var")
+abline(h = 1, col = "red", lty = 2)
+arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
+```
+
+```{r}
 #| label: pca-visualisation
 
 library(remotes)
@@ -161,8 +169,14 @@ scoreplot(mp.PC, lwd=2)
 ```
 
 ```{r}
+#| label: pca-skree-plot
+#| echo: false
 plot(1:73,mp.PC$var,xlab="PC",ylab="var")
 abline(h = 1, col = "red", lty = 2)
+arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
+```
+
+```{}
 ```
 
 ```{r}
