@@ -29,13 +29,15 @@ toc: false
 
 The data process in the following report was collected in Kangerluasunnguaq (Kobbefjord, Nuuk) in Southeast Greenland in 2024. The data was collected in 100 plots placed in an area of interest of aproxemately 12 km^2^ by randomised stratified sampling. Stratification was based on elevation (5 bins) and NDVI (4 bins).
 
-Within each circular plot of 1 m^2^ the abundance and maximum height of all vascular plant species was recorded. Abundance was assessed by means of the well known Braun-Blanquet scale (8 step version).
+Within each circular plot of 1 m^2^ the abundance and maximum height of all vascular plant species was recorded. Abundance was assessed by means of the well known Braun-Blanquet scale (8 step version). Abundance was assessed for bryophytes and lichens collectively as well.
 
 In all plots soil temperature, soil moisture, and general vegetation height, was measured as well. Soil temperature was measured with a generic thermometer (°C, 4 measurements, mean calculated). Soil moisture was measured with a ThetaProbe (% water content, 4 measurements, mean calculated). General vegetation height was measured with a generic ruler (cm, 4 measurements, mean calculated)
 
 The final processed data contains data from 100 plots and 72 species of vascular plants.
 
 ```{r}
+#| label: import-data
+#| echo: false
 
 stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
 
@@ -64,19 +66,21 @@ str(stat_mappingplants)
 
 The relationship between soil moisture and abundance of a given species cannot be assumed to be linear. Any given species of plants will have a preference for soil moisture (a wide or narrow interval) where frequency is highest. Abundance of said species will decrease with higher or lower soil moisture than this optimum. Hence, the relation could be considered to have somewhat a bell shape, but uncertain whether this would be symmetrical.
 
-Thus, for the purpose of the analysis a generalised additive model (GAM) have been chosen. Thise choise was made with emphasis on the fact that this model does not make any assumptions about the relationship of the explanatory and response variable.
+Thus, for the purpose of the analysis a generalized additive model (GAM) have been chosen. This choise was made with emphasis on the fact that this model does not make any assumptions about the relationship of the explanatory and response variable.
 
 -   Estimation: Which parameter values t the observations best? How certain are we of our estimates?
 
--   Model check : Are the assumptions on the underlying model fullled? Logically this should come rst, but for practical reasons it comes after estimation.
+-   Model check : Are the assumptions on the underlying model fullfilled? Logically this should come rst, but for practical reasons it comes after estimation.
 
 -   Simplifying the model (te
 
-Model choise (expexted relation ship, data types)
+Model choise (expected relation ship, data types)
 
 ## results
 
-## discussion
+## Discussion
+
+PCA is a commonly used method in ecology and vegetation science to aid in classification of vegetation structures. This is due to the advantages of
 
 Assumed model
 
@@ -88,12 +92,18 @@ evaluation
 
 • results
 
-• discussion
-
 ## PCA
+
+Can causes the plots to be most different? With 73 taxa and the abundance of bare ground, bryophytes and lichen, what abundances are most nessesary to describe the differences of the plots. Some occurrences might be redundant in eplaining the variation between plots.
+
+If the combination of characteristics
+
+What causes wines to be different? • With the 13 characteristics, we can distinguish wines through differences in the charateristics. But are all 13 characteristics necessary? Some may be redundant. • If we can identify scales (linear combinations of the characteristics) where the characteristics vary the most, we can also find a scale that differentiates optimally between the wines.
 
 ```{r}
 #| label: select_cols_list_function
+#| echo: false
+#| output: false
 
 select_cols_list <- function(df) {
   column_list <- colnames(df)
@@ -105,11 +115,10 @@ select_cols_list <- function(df) {
 
 ```{r}
 #| label: pca-data-prepping
+#| echo: false
 
 library(tidyverse)
 library(janitor)
-
-stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
 
 wide_data <- stat_mappingplants[-c(590, 288), ] |> 
   filter(rowid < 102) |> 
@@ -118,7 +127,10 @@ wide_data <- stat_mappingplants[-c(590, 288), ] |>
 
 wide_data2 <- wide_data |> 
   mutate(across(-1, ~ as.numeric(as.character(.)))) |> 
-  mutate(across(-1, ~ replace_na(., 0)))
+  mutate(across(-1, ~ replace_na(., 0))) |> 
+  filter(plot_name != "")
+
+
 
 sum(is.na(wide_data2))
 
@@ -126,9 +138,11 @@ sum(is.na(wide_data2))
 
 pca_stat <- wide_data2[, !(names(wide_data2) %in% c("plot_name", "phleum_commutatum"))]
 
+
+
 wide_data2
 
-select_cols_list(wide_data)
+#select_cols_list(wide_data)
 
 str(wide_data2)
 
@@ -136,15 +150,8 @@ str(wide_data2)
 ```
 
 ```{r}
-#| label: pca-skree-plot
+#| label: pca-data-calc
 #| echo: false
-plot(1:73,mp.PC$var,xlab="PC",ylab="var")
-abline(h = 1, col = "red", lty = 2)
-arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
-```
-
-```{r}
-#| label: pca-visualisation
 
 library(remotes)
 #install_github("rwehrens/ChemometricsWithR")
@@ -154,6 +161,22 @@ names(mp.PC)
 summary(mp.PC)
 
 head(mp.PC$loadings,n=3)
+```
+
+```{r}
+#| label: pca-skree-plot
+#| echo: false
+
+plot(1:76,mp.PC$var,xlab="PC",ylab="var")
+abline(h = 1, col = "red", lty = 2)
+arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
+```
+
+```{r}
+
+#| label: pca-x-t-eigenvalues-1
+#| echo: false
+#| output: false
 
 X<-var(scale(pca_stat))
 T<-eigen(X)$vectors
@@ -164,19 +187,77 @@ round(Lambda, digits=3)
 T[,1]
 round(T[,1],digits=2)
 sum(diag(Lambda))
+
+
+```
+
+plot_names \<- levels(as.factor(wide_data2\$plot_name))
+
 scoreplot(mp.PC, lwd=2)
 
+text(mp.PC\$scores\[,1\], mp.PC\$scores\[,2\], labels=plot_names, pos=3, cex=0.8)
+
+```{r}
+#| label: pca-plotting
+#| echo: false
+
+plot_names <- levels(as.factor(wide_data2$plot_name))
+
+scoreplot(mp.PC, lwd=2)
+text(mp.PC$scores[,1], mp.PC$scores[,2], labels=plot_names, pos=3, cex=0.8)
 ```
 
 ```{r}
-#| label: pca-skree-plot
+#| label: pca-x-t-eigenvalues-2
 #| echo: false
-plot(1:73,mp.PC$var,xlab="PC",ylab="var")
-abline(h = 1, col = "red", lty = 2)
-arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
+#| 
+loadingplot(mp.PC, show.names= TRUE)
 ```
 
-```{}
+```{r}
+#| label: pca-x-t-eigenvalues
+#| echo: false
+
+
+biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16)
+
+#legend("bottomright",levels(vintages), col=1:3,pch=1:3)
+```
+
+```{r}
+
+#| label: plot-percentage-variance-unexplained
+#| echo: false
+#| out-width: 100%
+
+
+plot(100*(77-cumsum(diag(Lambda)))/77,type="b",
+main="Percentage Variance Unexplained",
+xlab='Number of eigenvectors included',
+ylab='Percentage of total variance',
+ cex.axis = 0.5) # Reduce size of axis text)
+abline(h = 20, col = "darkgreen") 
+abline(h = 60, col = "darkgreen") 
+abline(v = 8.5, col = "darkgreen") 
+grid(nx = NULL, ny = NULL,
+     lty = 2,      # Grid line type
+     col = "gray", # Grid line color
+     lwd = 1)      # Grid line width
+```
+
+```{r}
+#| label: pca-x-t-eigenvalues-3
+#| echo: false
+
+library(chemometrics)
+mp.PCA.prin <- princomp(pca_stat, cor = TRUE)
+res <- pcaDiagplot(pca_stat, mp.PCA.prin, a=8)
+
+par(mfrow=c(1,1))
+plot(res$SDist, res$ODist, type="n")
+text(res$SDist, res$ODist, labels=as.character(1:178))
+abline(h = 7)
+abline(v = 5)
 ```
 
 ```{r}
@@ -238,14 +319,10 @@ When you click the **Render** button a document will be generated that includes 
 ```{r}
 #| label: loading packages
 #| echo: false
+#| 
 library(googlesheets4)
 library(janitor)
 library(tidyverse)
-```
-
-You can add options to executable code like this
-
-```{r}
 ```
 
 ```{r}
@@ -308,10 +385,21 @@ filtered_df <- stat_mappingplants[stat_mappingplants$taxon %in% frequent_taxons,
 ```{r}
 #| label: taxon-height-vs-plot_height
 
-veg_height <- stat_mappingplants |> 
-  group_by(plot_name) |> 
-  summarize(mean_tax = mean(height),
-            mean_plot = mean(mean_veg_height))
 
-plot(y = veg_height$mean_tax, x = veg_height$mean_plot)
 ```
+
+## The client
+
+The client, i.e. the receiver, of this report is my future self. I have basic understanding of statistics, statistical methods, and want to further my expertise in this areas both to explore the data I collect and have available as well as to document known phenomena of this same data. I have advance knowledge in biology and ecology. I do not have extensive of intuitive understanding of statistics and this report is aimed at document the learning outcomes of the data processing with the purpose of statistical reporting.
+
+It is my interest to gain an applied and hand on approach to statistics, answer the reserach question at hand, explore the data I have collected
+
+-   What does the client already know? (basic/advanced science on the subject, statistical methods, project circumstances)
+
+-   What does the client not know? (basic/advanced science on the subject, statistical methods, project circumstances)
+
+-   What is the interest of the Client? (research question, p-values, effect parameters, issues with data handling)
+
+-   What is NOT the interest of the Client? (R code, issues with data handling, intermediate analyses)
+
+-   Adapt the contents and structure (not the results though ) to fit the knowledge and interests of the Client.
