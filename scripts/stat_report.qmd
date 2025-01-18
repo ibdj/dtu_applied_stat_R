@@ -1,9 +1,10 @@
 ---
 title: "Report for 02935 Introduction to applied statistics and R for PhD students, Winter 2025"
 author: "Ida Bomholt Dyrholm Jacobsen"
+subtitle: ""
 format: 
   pdf:
-    geometry: "top=25.4mm, right=25.4mm, bottom=25.4mm, left=25.4mm"
+    geometry: "top=20mm, right=20mm, bottom=20mm, left=20mm"
     documentclass: report
     #classoption: a4paper
     papersize: A4
@@ -92,7 +93,135 @@ evaluation
 
 • results
 
-## PCA
+## GAM for soilmoisture
+
+
+```{r}
+#| label: loading packages
+#| echo: false
+#| include: false
+
+library(googlesheets4)
+library(janitor)
+library(glue)
+library(tidyverse)
+library(mgcv)
+```
+
+### Sal gla 
+```{r}
+#| label: gam-plotting
+#| echo: false
+#| output: true
+#| include: true
+
+salgla <- stat_mappingplants[stat_mappingplants$taxon=="Salix glauca",]
+salgla$bb_num <- as.numeric(salgla$bb_num)
+
+modelsalgla <- gam(bb_num ~ s(mean_soil_moisture), data = salgla)
+
+
+```
+
+```{r}
+#| label: gam-plotting-2
+#| echo: false
+#| output: true
+#| include: true
+
+plot(x = salgla$mean_soil_moisture , y = salgla$bb_num)
+
+
+```
+
+```{r}
+#| label: gam-salgla-plotting
+#| echo: false
+#| output: true
+#| include: true
+
+sum_salgla <- summary(modelsalgla)
+
+smooth_p_values <- sum_salgla$s.table[, "p-value"]
+
+#smooth_p_values
+```
+
+```{r}
+#| label: gam-salgla-plotting-2
+#| fig-cap: !expr glue("Plot of GAM model for soil moisture and abundance of Salix glauca. P-value is {round(smooth_p_values,3)} at 95 % level.")
+#| echo: false
+#| output: true
+#| include: true
+
+plot(modelsalgla)
+
+
+```
+
+```{r}
+#| label: gam-salgla-plotting-23
+#| fig-cap: !expr glue("Diagnosticsplot of ")
+#| echo: false
+#| output: true
+#| include: true
+
+modelsalgla2 <- lm(bb_num ~ I(mean_soil_moisture^2), data = salgla)
+
+
+summary(modelsalgla2)
+par(mfrow=c(2, 2))
+plot(modelsalgla2, which = 1:4)
+
+
+
+```
+
+
+### Des fle
+
+```{r}
+#| label: gam-plotting-desfle
+#| echo: false
+#| output: true
+#| include: true
+
+desfle <- stat_mappingplants[stat_mappingplants$taxon=="Deschampsia flexuosa",]
+desfle$bb_num <- as.numeric(desfle$bb_num)
+
+modeldesfle <- gam(bb_num ~ s(mean_soil_moisture), data = desfle)
+
+
+```
+
+```{r}
+#| label: gam-desfle-plotting
+#| echo: false
+#| output: true
+#| include: true
+
+sum_desfle <- summary(modeldesfle)
+
+smooth_p_values_desfle <- sum_desfle$s.table[, "p-value"]
+
+#smooth_p_values
+```
+
+```{r}
+#| label: gam-desfle-plotting-2
+#| fig-cap: !expr glue("Plot of GAM model for soil moisture and abundance of Deschampsia flexuosa. P-value is {round(smooth_p_values_desfle,3)} at 95 % level.")
+#| echo: false
+#| output: true
+#| include: true
+
+plot(modeldesfle)
+
+
+
+```
+
+
+## PCA all data
 
 Can causes the plots to be most different? With 73 taxa and the abundance of bare ground, bryophytes and lichen, what abundances are most nessesary to describe the differences of the plots. Some occurrences might be redundant in eplaining the variation between plots.
 
@@ -116,6 +245,7 @@ select_cols_list <- function(df) {
 ```{r}
 #| label: pca-data-prepping
 #| echo: false
+#| output: false
 
 library(tidyverse)
 library(janitor)
@@ -151,7 +281,8 @@ str(wide_data2)
 
 ```{r}
 #| label: pca-data-calc
-#| echo: false
+#| echo: true
+#| output: true
 
 library(remotes)
 #install_github("rwehrens/ChemometricsWithR")
@@ -163,65 +294,48 @@ summary(mp.PC)
 head(mp.PC$loadings,n=3)
 ```
 
-```{r}
-#| label: pca-skree-plot
-#| echo: false
-
-plot(1:76,mp.PC$var,xlab="PC",ylab="var")
-abline(h = 1, col = "red", lty = 2)
-arrows(x0 = 15, y0 = 3 ,x1 = 10, y1 = 2.5)
+```{}
 ```
 
 ```{r}
-
-#| label: pca-x-t-eigenvalues-1
+#| label: pca-intro-test
 #| echo: false
 #| output: false
+#| include: false
+#| results: "hide"
 
 X<-var(scale(pca_stat))
 T<-eigen(X)$vectors
 sum(is.na(X))
+```
+
+```{r}
+#| label: pca-x-t-eigenvalues-12
+#| code-fold: true
+#| echo: false
+#| output: false
+#| include: false
+
+
+head(T,n=3)
+Lambda<-t(T)%*%X%*%T
+round(Lambda, digits=3)
+
+```
+
+```{r}
+#| label: pca-x-t-eigenvalues-13
+#| code-fold: true
+#| echo: false
+#| output: false
+#| include: false
+
 head(T,n=3)
 Lambda<-t(T)%*%X%*%T
 round(Lambda, digits=3)
 T[,1]
 round(T[,1],digits=2)
 sum(diag(Lambda))
-
-
-```
-
-plot_names \<- levels(as.factor(wide_data2\$plot_name))
-
-scoreplot(mp.PC, lwd=2)
-
-text(mp.PC\$scores\[,1\], mp.PC\$scores\[,2\], labels=plot_names, pos=3, cex=0.8)
-
-```{r}
-#| label: pca-plotting
-#| echo: false
-
-plot_names <- levels(as.factor(wide_data2$plot_name))
-
-scoreplot(mp.PC, lwd=2)
-text(mp.PC$scores[,1], mp.PC$scores[,2], labels=plot_names, pos=3, cex=0.8)
-```
-
-```{r}
-#| label: pca-x-t-eigenvalues-2
-#| echo: false
-#| 
-loadingplot(mp.PC, show.names= TRUE)
-```
-
-```{r}
-#| label: pca-x-t-eigenvalues
-#| echo: false
-
-
-biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16)
-
-#legend("bottomright",levels(vintages), col=1:3,pch=1:3)
 ```
 
 ```{r}
@@ -230,7 +344,7 @@ biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16)
 #| echo: false
 #| out-width: 100%
 
-
+par(cex.axis = 0.5, cex.lab = 0.5)
 plot(100*(77-cumsum(diag(Lambda)))/77,type="b",
 main="Percentage Variance Unexplained",
 xlab='Number of eigenvectors included',
@@ -246,12 +360,63 @@ grid(nx = NULL, ny = NULL,
 ```
 
 ```{r}
+#| label: pca-plotting
+#| code-fold: true
+#| echo: false
+#| output: true
+#| include: true
+#| out-width: 100%
+
+par(cex.axis = 0.5, cex.lab = 0.5)
+par(mfrow=c(1,1))
+par(mgp = c(2, 0.5, 0))
+#par(mar = c(4, 1, 1, 1))
+par(cex.axis = 0.4, cex.lab = 0.4)
+plot_names <- levels(as.factor(wide_data2$plot_name))
+
+scoreplot(mp.PC, cex.axis = 0.7, pch = 1, lwd=0.1)
+title(line= -1)
+#xis(tck=-0.05)
+text(mp.PC$scores[,1], mp.PC$scores[,2], pos=2, cex=0.7, labels=plot_names)
+
+
+## check the individual extreme values of the 'extreme' plots
+#to add the plot names: labels=plot_names add in text function
+
+```
+
+```{r}
+#| label: pca-x-t-eigenvalues-2
+#| echo: false
+#| out-width: 100%
+
+par(mfrow = c(1,1),oma = c(0, 0, 0, 0), mar = c(4, 4, 4, 4))
+par(mfrow=c(1,1))
+par(cex.axis = 0.5, cex.lab = 0.5)
+loadingplot(mp.PC, show.names= TRUE, cex.axis = 0.3, cex=0.1)
+```
+
+
+```{r}
+#| label: pca-x-t-eigenvalues
+#| echo: false
+#| out-width: 100%
+
+par(cex.axis = 0.5, cex.lab = 0.5)
+biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16)
+
+#legend("bottomright",levels(vintages), col=1:3,pch=1:3)
+```
+
+
+
+```{r}
 #| label: pca-x-t-eigenvalues-3
 #| echo: false
 
 library(chemometrics)
 mp.PCA.prin <- princomp(pca_stat, cor = TRUE)
-res <- pcaDiagplot(pca_stat, mp.PCA.prin, a=8)
+res <- pcaDiagplot(pca_stat, mp.PCA.prin, a=45)
 
 par(mfrow=c(1,1))
 plot(res$SDist, res$ODist, type="n")
@@ -260,102 +425,208 @@ abline(h = 7)
 abline(v = 5)
 ```
 
+## PCA only vegetated data
+
 ```{r}
-#| label: soil_moisture
 
-plot_moisture <- stat_mappingplants |> 
-  group_by(plot_name) |> 
-  summarize(mean = mean(mean_soil_moisture))
+#| label: pca-data-prepping-veg
+#| echo: false
+#| output: false
+#| 
 
-plot(x = plot_moisture$mean, y = plot_moisture$mean)
-hist(plot_moisture$mean)
+wide_data <- stat_mappingplants[-c(590, 288), ] |> 
+  filter(rowid < 102) |> 
+  pivot_wider(id_cols = plot_name, names_from = taxon, values_from = bb_num) |> 
+  clean_names()
+
+wide_data2_veg <- wide_data |> 
+  mutate(across(-1, ~ as.numeric(as.character(.)))) |> 
+  mutate(across(-1, ~ replace_na(., 0))) |> 
+  filter(plot_name != "",
+         bareground < 50)
+
+row.names(wide_data2_veg) <- wide_data2_veg$plot_name
+
+pca_stat_veg <- wide_data2_veg[, !(names(wide_data2_veg) %in% c("plot_name", "phleum_commutatum"))]
+
+row.names(pca_stat_veg) <- wide_data2_veg$plot_name  
+
+pca_stat_veg <- pca_stat_veg[, colSums(pca_stat_veg) != 0]
+str(pca_stat_veg)
+
+summary(pca_stat_veg)
+sum(is.na(pca_stat_veg))
+
+```
+
+
+```{r}
+#| label: pca-data-calc-veg
+#| echo: true
+#| output: true
+
+library(remotes)
+#install_github("rwehrens/ChemometricsWithR")
+library(ChemometricsWithR)
+mp.PC.veg<- PCA(scale(pca_stat_veg))
+names(mp.PC.veg)
+summary(mp.PC.veg)
+
+summary(pca_stat_veg)
+
+head(pca_stat_veg)
+
+head(mp.PC.veg$loadings,n=3)
+```
+
+```{r}
+#| label: pca-intro-test-veg
+#| echo: false
+#| output: false
+#| include: false
+#| results: "hide"
+
+X.veg<-var(scale(pca_stat_veg))
+T.veg<-eigen(X.veg)$vectors
+sum(is.na(X.veg))
+```
+
+```{r}
+#| label: pca-x-t-eigenvalues-12-veg
+#| code-fold: true
+#| echo: false
+#| output: false
+#| include: false
+
+
+head(T.veg,n=3)
+Lambda.veg<-t(T.veg)%*%X.veg%*%T.veg
+round(Lambda.veg, digits=3)
 
 ```
 
 ```{r}
-# # Install and load vegan package
-# install.packages("vegan")
-# library(vegan)
-# 
-# # Compute the Bray-Curtis dissimilarity matrix
-# bray_curtis <- vegdist(pca_stat, method = "bray")
-# 
-# # Convert to a matrix (since vegdist returns a dist object)
-# bray_curtis_matrix <- as.matrix(bray_curtis)
-# 
-# # Perform classical MDS (similar to PCA, but using dissimilarity matrix)
-# mds <- cmdscale(bray_curtis_matrix, k = 2)  # k is the number of dimensions you want to keep (e.g., 2)
-# 
-# # Plot the MDS result
-# plot(mds, main = "PCA-like plot using Bray-Curtis Dissimilarity")
+#| label: pca-x-t-eigenvalues-13-veg
+#| code-fold: true
+#| echo: false
+#| output: false
+#| include: false
+
+head(T.veg,n=3)
+Lambda.veg<-t(T.veg)%*%X.veg%*%T.veg
+round(Lambda.veg, digits=3)
+T.veg[,1]
+round(T.veg[,1],digits=2)
+sum(diag(Lambda.veg))
 ```
+```{r}
+
+#| label: plot-percentage-variance-unexplained-veg
+#| echo: false
+#| out-width: 100%
+
+par(cex.axis = 0.5, cex.lab = 0.5)
+plot(100*(73-cumsum(diag(Lambda.veg)))/73,type="b",
+main="Percentage Variance Unexplained",
+xlab='Number of eigenvectors included',
+ylab='Percentage of total variance',
+ cex.axis = 0.5) # Reduce size of axis text)
+abline(h = 20, col = "darkgreen") 
+abline(h = 60, col = "darkgreen") 
+abline(v = 8.5, col = "darkgreen") 
+grid(nx = NULL, ny = NULL,
+     lty = 2,      # Grid line type
+     col = "gray", # Grid line color
+     lwd = 1)      # Grid line width
+```
+
+
+```{r}
+#| label: pca-plotting-veg
+#| code-fold: true
+#| echo: false
+#| output: true
+#| include: true
+#| out-width: 100%
+
+par(cex.axis = 0.5, cex.lab = 0.5)
+par(mfrow=c(1,1))
+par(mgp = c(2, 0.5, 0))
+#par(mar = c(4, 1, 1, 1))
+par(cex.axis = 0.4, cex.lab = 0.4)
+plot_names_veg <- levels(as.factor(wide_data2_veg$plot_name))
+
+scoreplot(mp.PC.veg, cex.axis = 0.7, pch = 1, lwd=0.1)
+title(line= -1)
+#xis(tck=-0.05)
+text(mp.PC.veg$scores[,1], mp.PC.veg$scores[,2], pos=2, cex=0.7, labels = "")
+
+
+## check the individual extreme values of the 'extreme' plots
+#to add the plot names: labels=plot_names add in text function labels=plot_names_veg
+
+```
+
+## PCA only veg with ggplot
 
 ```{r}
 
-# #| label: chunk-6
-# # Perform k-means clustering (example: 3 clusters)
-# set.seed(42)
-# kmeans_result <- kmeans(wide_data2[, -1], centers = 32)  # Exclude first column (plot_name)
-# 
-# # Add the cluster labels to the dataset
-# wide_data2$cluster <- as.factor(kmeans_result$cluster)
-# 
-# # Fit the tree model with k-means cluster labels as the response
-# tree_model <- tree(cluster ~ ., data = wide_data2[, -1])  # Exclude non-numeric columns (plot_name, etc.)
-# 
-# plot(tree_model)
-# text(tree_model, pretty = 0) 
-# 
-# # Print the tree model
-# summary(tree_model)
+#| label: pca-plotting-ggplot
+#| code-fold: true
+#| echo: false
+#| output: true
+#| include: true
+#| out-width: 100%
+
+
+X <- scale(pca_stat_veg)
+pca_stat_veg_ggplot <- PCA(X)
+
+# Extract scores
+scores <- as.data.frame(pca_stat_veg_ggplot$scores)
+scores$plots <- row.names(pca_stat_veg)
+
+# Extract loadings
+loadings <- as.data.frame(pca_stat_veg_ggplot$loadings)
+loadings$Variable <- rownames(loadings)
+
+df <- as.data.frame(summary(pca_stat_veg_ggplot))
+
+ggplot(scores, aes(x = `PC 1`, y = `PC 2`)) +
+  geom_point(size = 2, alpha = 0.6, color = "blue") +
+  #theme_minimal() +
+  labs(title = "PCA Score Plot",
+       x = paste0("PC1 (", round(pca_stat_veg_ggplot[1,1], 1), "%)"),
+       y = paste0("PC2 (", round(pca_stat_veg_ggplot[1,2], 1), "%)"))
+
 ```
+
+
+```{r}
+#| label: pca-plotting-ggplot
+#| code-fold: true
+#| echo: false
+#| output: true
+#| include: true
+# ggplot() +
+#   geom_point(data = scores, aes(x = PC1, y = PC2, color = Species), size = 3) +
+#   geom_segment(data = loadings, aes(x = 0, y = 0, xend = PC1*5, yend = PC2*5),
+#                arrow = arrow(length = unit(0.2, "cm")), color = "red") +
+#   geom_text(data = loadings, aes(x = PC1*5, y = PC2*5, label = Variable),
+#             color = "red", vjust = 1) +
+#   coord_fixed() +
+#   theme_minimal() +
+#   labs(title = "PCA Biplot",
+#        x = paste0("PC1 (", round(iris_pca@R2[1]*100, 1), "%)"),
+#        y = paste0("PC2 (", round(iris_pca@R2[2]*100, 1), "%)")) 
+
+```
+
+
 
 # Conclusion
 
 # Appendix
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-#| label: loading packages
-#| echo: false
-#| 
-library(googlesheets4)
-library(janitor)
-library(tidyverse)
-```
-
-```{r}
-
-# stat_mappingplants <- readRDS("~/Library/CloudStorage/OneDrive-Aarhusuniversitet/MappingPlants/admin/courses/2025 01 Applied statistics and R/dtu_applied_stat_R/data/stat_mappingplants.rds")
-# 
-# taxa <- pivot |> 
-#   group_by(taxon) |> 
-#   count()
-# 
-# soil_moi <- stat_mappingplants
-# 
-# plot(x = stat_mappingplants$mean_soil_moisture, y = stat_mappingplants$mean_veg_height)
-# 
-# hist(stat_mappingplants$mean_soil_moisture)
-# 
-# empnig <- stat_mappingplants[stat_mappingplants$taxon=="Empetrum nigrum",]
-# 
-# plot(x = empnig$mean_soil_moisture, y = empnig$bb_num)
-# 
-# 
-# par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1,1))
-# model <- gam(bb_num ~ s(mean_soil_moisture), data = stat_mappingplants[stat_mappingplants$taxon == "Salix arctophila", ])
-# plot(model) 
-# par(mfrow = c(1,1))
-# 
-# summary(model)
-# 
-# library(tree)
-# model<-tree(bb_num ~ ., data = empnig)
-# plot(model)
-# text(model)
-```
 
 ```{r}
 taxon_counts <- table(stat_mappingplants$taxon)
@@ -371,20 +642,20 @@ taxon_summary <- taxon_summary[order(-taxon_summary$Count), ]
 ```
 
 ```{r}
+#| label: taxon-counts-summary
+#| echo: false
+#| output: false
+#| include: false
+#| results: "hide"
+
 # Count the occurrences of each taxon
 taxon_counts <- table(stat_mappingplants$taxon)
 
 # Get the names of taxons with more than 10 observations
-frequent_taxons <- names(taxon_counts[taxon_counts > 10])
+frequent_taxons <- as.data.frame(names(taxon_counts[taxon_counts > 10]))
 
 # Filter the dataset
 filtered_df <- stat_mappingplants[stat_mappingplants$taxon %in% frequent_taxons, ]
-
-```
-
-```{r}
-#| label: taxon-height-vs-plot_height
-
 
 ```
 
