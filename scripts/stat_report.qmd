@@ -400,10 +400,12 @@ loadingplot(mp.PC, show.names= TRUE, cex.axis = 0.3, cex=0.1)
 ```{r}
 #| label: pca-x-t-eigenvalues
 #| echo: false
+#| fig-width: 6
+#| fig-height: 4
 #| out-width: 100%
 
 par(cex.axis = 0.5, cex.lab = 0.5)
-biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16)
+biplot(mp.PC, score.col = "black", show.names = "loadings", pch = 16,  cex.lab = 0.5)
 
 #legend("bottomright",levels(vintages), col=1:3,pch=1:3)
 ```
@@ -547,7 +549,9 @@ grid(nx = NULL, ny = NULL,
 #| echo: false
 #| output: true
 #| include: true
-#| out-width: 100%
+#| fig-width: 6
+#| fig-height: 6
+##| out-width: 100%
 
 par(cex.axis = 0.5, cex.lab = 0.5)
 par(mfrow=c(1,1))
@@ -579,49 +583,49 @@ text(mp.PC.veg$scores[,1], mp.PC.veg$scores[,2], pos=2, cex=0.7, labels = "")
 #| out-width: 100%
 
 
-X <- scale(pca_stat_veg)
-pca_stat_veg_ggplot <- PCA(X)
-
-pca_stat_veg_ggplot
-
-# Extract scores
-scores <- as.data.frame(pca_stat_veg_ggplot$scores)
-scores$plots <- row.names(pca_stat_veg)
-
-# Extract loadings
-loadings <- as.data.frame(pca_stat_veg_ggplot$loadings)
-loadings$taxon <- rownames(loadings)
-
-pca_summary_veg <- as.data.frame(summary(pca_stat_veg_ggplot))
-
-
-#library("devtools")
-#install_github("kassambara/factoextra")
-
-library("factoextra")
-get_pca(res.pca, element = c("var", "ind"))
-
-# Calculate variance explained
-eigenvals <- pca_stat_veg_ggplot@var
-var_percent <- (eigenvals/sum(eigenvals)) * 100
-
-# Score plot showing plot distribution
-ggplot(scores, aes(x = `PC 1`, y = `PC2`)) +
-  geom_point(size = 3) +
-  geom_text(aes(label = Plot_ID), vjust = -0.5, size = 3) +
-  theme_minimal() +
-  labs(title = "PCA Score Plot of Vegetation Plots",
-       x = paste0("PC1 (", round(pca_stat_veg_ggplot@R2[1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(pca_stat_veg_ggplot@R2[2]*100, 1), "%)"))
-
-# Species loading plot
-ggplot(loadings, aes(x = PC1, y = PC2)) +
-  geom_segment(aes(x = 0, y = 0, xend = PC1, yend = PC2), 
-              arrow = arrow(length = unit(0.2, "cm"))) +
-  geom_text(aes(label = Species), size = 3, vjust = 1) +
-  coord_fixed() +
-  theme_minimal() +
-  labs(title = "Species Contributions to PCA Components")
+# X <- scale(pca_stat_veg)
+# pca_stat_veg_ggplot <- PCA(X)
+# 
+# pca_stat_veg_ggplot
+# 
+# # Extract scores
+# scores <- as.data.frame(pca_stat_veg_ggplot$scores)
+# scores$plots <- row.names(pca_stat_veg)
+# 
+# # Extract loadings
+# loadings <- as.data.frame(pca_stat_veg_ggplot$loadings)
+# loadings$taxon <- rownames(loadings)
+# 
+# pca_summary_veg <- as.data.frame(summary(pca_stat_veg_ggplot))
+# 
+# 
+# #library("devtools")
+# #install_github("kassambara/factoextra")
+# 
+# library("factoextra")
+# get_pca(res.pca, element = c("var", "ind"))
+# 
+# # Calculate variance explained
+# eigenvals <- pca_stat_veg_ggplot@var
+# var_percent <- (eigenvals/sum(eigenvals)) * 100
+# 
+# # Score plot showing plot distribution
+# ggplot(scores, aes(x = `PC 1`, y = `PC2`)) +
+#   geom_point(size = 3) +
+#   geom_text(aes(label = Plot_ID), vjust = -0.5, size = 3) +
+#   theme_minimal() +
+#   labs(title = "PCA Score Plot of Vegetation Plots",
+#        x = paste0("PC1 (", round(pca_stat_veg_ggplot@R2[1]*100, 1), "%)"),
+#        y = paste0("PC2 (", round(pca_stat_veg_ggplot@R2[2]*100, 1), "%)"))
+# 
+# # Species loading plot
+# ggplot(loadings, aes(x = PC1, y = PC2)) +
+#   geom_segment(aes(x = 0, y = 0, xend = PC1, yend = PC2), 
+#               arrow = arrow(length = unit(0.2, "cm"))) +
+#   geom_text(aes(label = Species), size = 3, vjust = 1) +
+#   coord_fixed() +
+#   theme_minimal() +
+#   labs(title = "Species Contributions to PCA Components")
 
 ```
 
