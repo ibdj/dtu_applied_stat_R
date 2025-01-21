@@ -2,7 +2,7 @@
 
 # Slide 6:
 # reading in data:
-load("data/Winedata.Rdata")
+load("data/10/Winedata.Rdata")
 
 # two objects: wines, with characteristics, and vintages the wine type.
 ls(wines)
@@ -81,7 +81,7 @@ head(T,n=3)
 # Slide 25:
 
 head(wines.PC$scores,n=3)
-head(scale(wines)%*%T,n=3)
+head(scale(wines.PC)%*%T,n=3)
 
 # Slide 26:
 

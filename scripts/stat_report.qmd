@@ -24,6 +24,9 @@ toc: false
 
 # Introduction
 
+This report is an introduction to the use of PCA, principal component analysis, applied in ecology and vegetation composition exploration. PCA is a widely use method in vegetation ecology as is allows for exploration of structures and patterns. E.i. to detect groupings of vegetation types or ecotones in the dataset in quetion. Classification in to vegetation types or ecotones is a much used practice as generalisations and groupings are useful in upscaling and applicable generalisations in ecological practices. However, since the ecological factors influencing the distribution, occurrences and range of plant species and individual are gradients/spectrums determining specific distingushable groups in vegetation types are difficult determine, as there will be as many transitinal types. 
+But this is one of the reasons that PCA and the visualisation of the PCA is usefull as is also allows for the 
+
 {{< pagebreak >}}
 
 # Description of data
@@ -92,133 +95,6 @@ evaluation
 • Statistical analyses
 
 • results
-
-## GAM for soilmoisture
-
-
-```{r}
-#| label: loading packages
-#| echo: false
-#| include: false
-
-library(googlesheets4)
-library(janitor)
-library(glue)
-library(tidyverse)
-library(mgcv)
-```
-
-### Sal gla 
-```{r}
-#| label: gam-plotting
-#| echo: false
-#| output: true
-#| include: true
-
-salgla <- stat_mappingplants[stat_mappingplants$taxon=="Salix glauca",]
-salgla$bb_num <- as.numeric(salgla$bb_num)
-
-modelsalgla <- gam(bb_num ~ s(mean_soil_moisture), data = salgla)
-
-
-```
-
-```{r}
-#| label: gam-plotting-2
-#| echo: false
-#| output: true
-#| include: true
-
-plot(x = salgla$mean_soil_moisture , y = salgla$bb_num)
-
-
-```
-
-```{r}
-#| label: gam-salgla-plotting
-#| echo: false
-#| output: true
-#| include: true
-
-sum_salgla <- summary(modelsalgla)
-
-smooth_p_values <- sum_salgla$s.table[, "p-value"]
-
-#smooth_p_values
-```
-
-```{r}
-#| label: gam-salgla-plotting-2
-#| fig-cap: !expr glue("Plot of GAM model for soil moisture and abundance of Salix glauca. P-value is {round(smooth_p_values,3)} at 95 % level.")
-#| echo: false
-#| output: true
-#| include: true
-
-plot(modelsalgla)
-
-
-```
-
-```{r}
-#| label: gam-salgla-plotting-23
-#| fig-cap: !expr glue("Diagnosticsplot of ")
-#| echo: false
-#| output: true
-#| include: true
-
-modelsalgla2 <- lm(bb_num ~ I(mean_soil_moisture^2), data = salgla)
-
-
-summary(modelsalgla2)
-par(mfrow=c(2, 2))
-plot(modelsalgla2, which = 1:4)
-
-
-
-```
-
-
-### Des fle
-
-```{r}
-#| label: gam-plotting-desfle
-#| echo: false
-#| output: true
-#| include: true
-
-desfle <- stat_mappingplants[stat_mappingplants$taxon=="Deschampsia flexuosa",]
-desfle$bb_num <- as.numeric(desfle$bb_num)
-
-modeldesfle <- gam(bb_num ~ s(mean_soil_moisture), data = desfle)
-
-
-```
-
-```{r}
-#| label: gam-desfle-plotting
-#| echo: false
-#| output: true
-#| include: true
-
-sum_desfle <- summary(modeldesfle)
-
-smooth_p_values_desfle <- sum_desfle$s.table[, "p-value"]
-
-#smooth_p_values
-```
-
-```{r}
-#| label: gam-desfle-plotting-2
-#| fig-cap: !expr glue("Plot of GAM model for soil moisture and abundance of Deschampsia flexuosa. P-value is {round(smooth_p_values_desfle,3)} at 95 % level.")
-#| echo: false
-#| output: true
-#| include: true
-
-plot(modeldesfle)
-
-
-
-```
 
 
 ## PCA all data

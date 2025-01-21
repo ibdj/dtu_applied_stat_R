@@ -2,7 +2,7 @@ setwd("C:/ANST/Undervisning/Kurser/phd kursus i basal statistik Jun2024/Regressi
 
 # slide 11:
 
-oz <- read.delim("Data/ozone.data.txt")
+oz <- read.delim("data/04/ozone.data.txt")
 
 library(car)
 scatterplotMatrix(~ ozone + rad + temp + wind, 
@@ -46,13 +46,15 @@ plot(model)
 par(mfrow = c(1,1))
 
 
+
 # Slide 33:
 
 library(tree)
+par(mfrow = c(1,1))
 model<-tree(ozone~., data = oz)
 plot(model)
 text(model)
-
+par(mfrow = c(1,1))
 
 # Slide 38:
 

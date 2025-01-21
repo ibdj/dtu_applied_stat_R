@@ -29,6 +29,7 @@ par(mfrow = c(1,1))
 
 
 #Slide 27:
+replacing values!
 
 CADdata$expo[CADdata$group==3] <- 1
 CADdata$expo[CADdata$group==2] <- 2

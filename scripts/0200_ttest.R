@@ -148,6 +148,7 @@ t.test(Y1,Y2,var.equal=TRUE)
 
 
 # Slide 27:
+subsetting a dataframe
 
 Y1<-Mobile$Time[Mobile$Group=="Mobile"]
 Y2<-Mobile$Time[Mobile$Group=="Control"]
