@@ -137,7 +137,7 @@ text(res$SDist, res$ODist, labels=as.character(1:178))
 
 # Slide 38:
 
-jam<-read.table("data/jam.txt", header=TRUE, quote="\"")
+jam<-read.table("data/10/jam.txt", header=TRUE, quote="\"")
 
 # first column is names, last column is outcome:
 
