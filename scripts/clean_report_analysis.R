@@ -79,23 +79,14 @@ res<-pcaDiagplot(pca_stat, mp.PC, a=37)
 
 par(mfrow=c(1,1))
 plot(res$SDist, res$ODist, type="n")
-text(res$SDist, res$ODist, labels=as.character(1:178))
-abline(v = 5, col = "red", lty = 2)  # Vertical line
-abline(h = 3, col = "red", lty = 2)  # Horizontal line
-
-# if the plot should be equal size, xlim = c(0, 10), ylim = c(0, 10)
-
-# Create a blank plot with a 10x10 axis scale
-plot(res$SDist, res$ODist, xlim = c(0, 10), ylim = c(0, 10), 
-     xlab = "Score Distance (SD)", ylab = "Orthogonal Distance (OD)", 
-     main = "Score Distance vs Orthogonal Distance", type = "n")
-
-# Add vertical and horizontal lines at x = 5 and y = 5
-abline(v = 5, col = "red", lty = 2)  # Vertical line
-abline(h = 5, col = "red", lty = 2)  # Horizontal line
+text(res$SDist, res$ODist, labels=as.character(1:nrow(as.data.frame(res$ODist))), cex = 0.9)
+abline(v = ((max(res$SDist) + min(res$SDist)) / 2), col = "red", lty = 2)  # Vertical line
+abline(h = ((max(res$ODist) + min(res$ODist)) / 2), col = "red", lty = 2)  # Horizontal line
 
 
 
+
+############################################################################################################
 ### select data filter ####
 select_data <- wide_data2_[!(wide_data2_$plot_name %in% c("MP024","MP034", "MP041", "MP051", "mp086", "Mp088")), ]
 
@@ -147,13 +138,44 @@ dev.off()  # Close the PDF device
 select_pca<- PCA(scale(select_data_pca))
 labeling <- as.data.frame(select_pca$loadings)
 
-### select data basic summary II ####
+### select data basic summary I ####
 
 summary(select_pca)
 
 head(select_pca$loadings,n=3)
 
 ### select data basic summary II ####
+
+select_X<-var(scale(select_data_pca))
+select_T<-eigen(select_X)$vectors
+sum(is.na(select_X))
+
+### select data basic summary III ####
+
+head(select_T,n=3)
+select_Lambda<-t(select_T)%*%select_X%*%select_T
+round(select_Lambda, digits=3)
+
+### select data basic summary IIII ####
+
+select_T[,1]
+round(select_T[,1],digits=2) #Thus the most varying combination of the scaled data is this
+sum(diag(select_Lambda))
+
+### select data skreee plot ####
+#par(cex.axis = 0.8, cex.lab = 0.8)
+plot(100*(73-cumsum(diag(select_Lambda)))/73,type="b",
+     main="Percentage Variance Unexplained",
+     xlab='Number of eigenvectors included',
+     ylab='Percentage of total variance',
+     cex.axis = 0.5) # Reduce size of axis text)
+#abline(h = 20, col = "darkgreen") 
+abline(h = 10, col = "darkgreen") 
+abline(v = 36, col = "darkgreen") 
+grid(nx = NULL, ny = NULL,
+     lty = 2,      # Grid line type
+     col = "gray", # Grid line color
+     lwd = 1)      # Grid line width
 
 ### select data score plot ####
 
@@ -172,30 +194,20 @@ install_github("vqv/ggbiplot")
 
 library(ggbiplot)
 
-ggbiplot(prcomp(scale(select_data_pca)),groups=select_soil_moisture_groups,ellipse=TRUE, var.axes = F, alpha = 0.8)
+ggbiplot(prcomp(scale(select_data_pca)),groups=select_soil_moisture_groups,ellipse=TRUE, alpha = 0.8, var.axes = FALSE)
 text(select_pca$scores[,1], select_pca$scores[,2], pos=2, cex=0.7, labels=select_plot_names)
 #labs(color="Soil moisture level")
-
+#,  to remove the loadings
 
 ### select data diagnostics plot I ####
 
 select_pca_res<- princomp(select_data_pca, cor = TRUE)
-res<-pcaDiagplot(select_data_pca, select_pca_res, a=37)
+select_res<-pcaDiagplot(select_data_pca, select_pca_res, a=36)
 ### select data diagnostics plot II ####
 
 par(mfrow=c(1,1))
-plot(res$SDist, res$ODist, type="n")
-text(res$SDist, res$ODist, labels=as.character(1:178))
-abline(v = 5, col = "red", lty = 2)  # Vertical line
-abline(h = 3, col = "red", lty = 2)  # Horizontal line
+plot(select_res$SDist, select_res$ODist, type="n")
+text(select_res$SDist, select_res$ODist, labels=as.character(1:nrow(as.data.frame(select_res$SDist))), cex = 0.6)
+abline(v = ((max(select_res$SDist) + min(select_res$SDist)) / 2), col = "red", lty = 2)  # Vertical line
+abline(h = ((max(select_res$ODist) + min(select_res$ODist)) / 2), col = "red", lty = 2)  # Horizontal line
 
-# if the plot should be equal size, xlim = c(0, 10), ylim = c(0, 10)
-
-# Create a blank plot with a 10x10 axis scale
-plot(res$SDist, res$ODist, xlim = c(0, 10), ylim = c(0, 10), 
-     xlab = "Score Distance (SD)", ylab = "Orthogonal Distance (OD)", 
-     main = "Score Distance vs Orthogonal Distance", type = "n")
-
-# Add vertical and horizontal lines at x = 5 and y = 5
-abline(v = 5, col = "red", lty = 2)  # Vertical line
-abline(h = 5, col = "red", lty = 2)  # Horizontal line
